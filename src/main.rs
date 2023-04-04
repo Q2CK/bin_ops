@@ -10,4 +10,5 @@ fn main() {
     println!("{:?}", data1 & data2);
     println!("{:?}", !(data1 | data2));
     println!("{:?}", data1 ^ data2);
+    println!("{:?}", Data::rsh(data1));
 }

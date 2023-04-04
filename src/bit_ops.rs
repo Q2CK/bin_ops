@@ -216,7 +216,7 @@ impl ops::Not for Data {
 
 #[allow(arithmetic_overflow)]
 impl Data {
-    pub(crate) fn from(mut content: ContentType, width: u32) -> Data {
+    pub fn from(mut content: ContentType, width: u32) -> Data {
         let constraint = ContentType::pow(2, width);
 
         content %= constraint;
@@ -237,7 +237,30 @@ impl Data {
         }
     }
 
-    fn cmp(&self, rhs: &Data) -> CMPFlags {
+    pub fn rsh(val: Data) -> Data {
+        let constraint = ContentType::pow(2, val.width);
+
+        let temp_overflow = val.content % 2 == 1;
+
+        let result = (val.content >> 1) % constraint;
+
+        Data {
+            content: result,
+            width: val.width,
+            flags: ALUFlags {
+                carry:        false,
+                not_carry:    false,
+                overflow:     temp_overflow,
+                not_overflow: false,
+                zero:         result == 0,
+                not_zero:     result != 0,
+                even:         result % 2 == 0,
+                odd:          result % 2 != 0,
+            }
+        }
+    }
+
+    pub fn cmp(&self, rhs: &Data) -> CMPFlags {
         CMPFlags {
             greater: self.content > rhs.content,
             less_equal: self.content <= rhs.content,
