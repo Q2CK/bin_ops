@@ -7,14 +7,14 @@ type ContentType = usize;
 
 #[derive(Debug, Copy, Clone)]
 pub struct ALUFlags {
-    pub carry:        bool,
-    pub not_carry:    bool,
-    pub overflow:     bool,
-    pub not_overflow: bool,
-    pub zero:         bool,
-    pub not_zero:     bool,
-    pub even:         bool,
-    pub odd:          bool
+    pub carry:         bool,
+    pub not_carry:     bool,
+    pub overflow:      bool,
+    pub not_overflow:  bool,
+    pub zero:          bool,
+    pub not_zero:      bool,
+    pub even:          bool,
+    pub odd:           bool
 }
 
 #[derive(Debug, Copy, Clone)]
