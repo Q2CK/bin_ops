@@ -45,14 +45,15 @@ impl ops::Add for DataWord {
         let constraint = ContentType::pow(2, bit_width);
 
         let result = (self.content % constraint).wrapping_add(rhs.content % constraint);
+        let result_cut_msb = (self.content % (constraint / 2)).wrapping_add(rhs.content % (constraint / 2));
 
         let properties = ALUFlags {
-            carry:        (0 as ContentType).wrapping_sub(constraint) & result != 0,
-            not_carry:    (0 as ContentType).wrapping_sub(constraint) & result == 0,
-            overflow:     ((0 as ContentType).wrapping_sub(constraint) & result != 0)
-                          ^ ((0 as ContentType).wrapping_sub(2 * constraint) & result != 0),
-            not_overflow: !((0 as ContentType).wrapping_sub(constraint) & result != 0)
-                          ^ ((0 as ContentType).wrapping_sub(2 * constraint) & result != 0),
+            carry:        constraint & result != 0,
+            not_carry:    constraint & result == 0,
+            overflow:     (constraint & result != 0)
+                          ^ ((constraint / 2) & result_cut_msb != 0),
+            not_overflow: (constraint & result == 0)
+                          ^ ((constraint / 2) & result_cut_msb != 0),
             zero:         result % constraint == 0,
             not_zero:     result % constraint != 0,
             even:         result % 2 == 0,
@@ -76,14 +77,15 @@ impl ops::Sub for DataWord {
         let constraint = ContentType::pow(2, bit_width);
 
         let result = (self.content % constraint).wrapping_add(!rhs.content % constraint).wrapping_add(1);
+        let result_cut_msb = (self.content % (constraint / 2)).wrapping_add(rhs.content % (constraint / 2));
 
         let properties = ALUFlags {
-            carry:        (0 as ContentType).wrapping_sub(constraint) & result != 0,
-            not_carry:    (0 as ContentType).wrapping_sub(constraint) & result == 0,
-            overflow:     ((0 as ContentType).wrapping_sub(constraint) & result != 0)
-                          ^ ((0 as ContentType).wrapping_sub(2 * constraint) & result != 0),
-            not_overflow: !((0 as ContentType).wrapping_sub(constraint) & result != 0)
-                          ^ ((0 as ContentType).wrapping_sub(2 * constraint) & result != 0),
+            carry:        constraint & result != 0,
+            not_carry:    constraint & result == 0,
+            overflow:     (constraint & result != 0)
+                          ^ ((constraint / 2) & result_cut_msb != 0),
+            not_overflow: (constraint & result == 0)
+                          ^ ((constraint / 2) & result_cut_msb != 0),
             zero:         result % constraint == 0,
             not_zero:     result % constraint != 0,
             even:         result % 2 == 0,
@@ -262,14 +264,14 @@ impl DataWord {
 
     pub fn cmp(&self, rhs: &DataWord) -> CMPFlags {
         CMPFlags {
-            greater: self.content > rhs.content,
-            less_equal: self.content <= rhs.content,
-            less: self.content < rhs.content,
+            greater:       self.content > rhs.content,
+            less_equal:    self.content <= rhs.content,
+            less:          self.content < rhs.content,
             greater_equal: self.content >= rhs.content,
-            equal: self.content == rhs.content,
-            not_equal: self.content != rhs.content,
-            always_false: false,
-            always_true: true,
+            equal:         self.content == rhs.content,
+            not_equal:     self.content != rhs.content,
+            always_false:  false,
+            always_true:   true,
         }
     }
 }
