@@ -3,12 +3,12 @@ mod bit_ops;
 use bit_ops::*;
 
 fn main() {
-    let data1 = Data::from(5, 8);
-    let data2 = Data::from(5, 8);
+    let data1 = DataWord::from(5, 8);
+    let data2 = DataWord::from(8, 8);
     println!("{:?}", data1 + data2);
     println!("{:?}", data1 - data2);
     println!("{:?}", data1 & data2);
     println!("{:?}", !(data1 | data2));
     println!("{:?}", data1 ^ data2);
-    println!("{:?}", Data::rsh(data1));
+    println!("{:?}", DataWord::rsh(data1));
 }

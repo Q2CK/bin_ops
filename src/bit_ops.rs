@@ -30,17 +30,17 @@ pub struct CMPFlags {
 }
 
 #[derive(Debug, Copy, Clone)]
-pub struct Data {
+pub struct DataWord {
     pub content: ContentType,
     pub width:   u32,
     pub flags:   ALUFlags,
 }
 
 #[allow(arithmetic_overflow)]
-impl ops::Add for Data {
-    type Output = Data;
+impl ops::Add for DataWord {
+    type Output = DataWord;
 
-    fn add(self, rhs: Data) -> Data {
+    fn add(self, rhs: DataWord) -> DataWord {
         let bit_width = min(self.width, rhs.width);
         let constraint = ContentType::pow(2, bit_width);
 
@@ -59,7 +59,7 @@ impl ops::Add for Data {
             odd:          result % 2 != 0
         };
 
-        Data {
+        DataWord {
             content: result % constraint,
             width:   bit_width,
             flags:   properties
@@ -68,14 +68,14 @@ impl ops::Add for Data {
 }
 
 #[allow(arithmetic_overflow)]
-impl ops::Sub for Data {
-    type Output = Data;
+impl ops::Sub for DataWord {
+    type Output = DataWord;
 
-    fn sub(self, rhs: Data) -> Data {
+    fn sub(self, rhs: DataWord) -> DataWord {
         let bit_width = min(self.width, rhs.width);
         let constraint = ContentType::pow(2, bit_width);
 
-        let result = (self.content % constraint).wrapping_sub(rhs.content % constraint);
+        let result = (self.content % constraint).wrapping_add(!rhs.content % constraint).wrapping_add(1);
 
         let properties = ALUFlags {
             carry:        (0 as ContentType).wrapping_sub(constraint) & result != 0,
@@ -90,7 +90,7 @@ impl ops::Sub for Data {
             odd:          result % 2 != 0
         };
 
-        Data {
+        DataWord {
             content: result % constraint,
             width:   bit_width,
             flags:   properties
@@ -99,10 +99,10 @@ impl ops::Sub for Data {
 }
 
 #[allow(arithmetic_overflow)]
-impl ops::BitAnd for Data {
-    type Output = Data;
+impl ops::BitAnd for DataWord {
+    type Output = DataWord;
 
-    fn bitand(self, rhs: Self) -> Data {
+    fn bitand(self, rhs: Self) -> DataWord {
         let bit_width = min(self.width, rhs.width);
         let constraint = ContentType::pow(2, bit_width);
 
@@ -119,7 +119,7 @@ impl ops::BitAnd for Data {
             odd:          result % 2 != 0
         };
 
-        Data {
+        DataWord {
             content: result % constraint,
             width:   bit_width,
             flags:   properties
@@ -128,10 +128,10 @@ impl ops::BitAnd for Data {
 }
 
 #[allow(arithmetic_overflow)]
-impl ops::BitOr for Data {
-    type Output = Data;
+impl ops::BitOr for DataWord {
+    type Output = DataWord;
 
-    fn bitor(self, rhs: Self) -> Data {
+    fn bitor(self, rhs: Self) -> DataWord {
         let bit_width = min(self.width, rhs.width);
         let constraint = ContentType::pow(2, bit_width);
 
@@ -148,7 +148,7 @@ impl ops::BitOr for Data {
             odd:          result % 2 != 0
         };
 
-        Data {
+        DataWord {
             content: result % constraint,
             width:   bit_width,
             flags:   properties
@@ -157,10 +157,10 @@ impl ops::BitOr for Data {
 }
 
 #[allow(arithmetic_overflow)]
-impl ops::BitXor for Data {
-    type Output = Data;
+impl ops::BitXor for DataWord {
+    type Output = DataWord;
 
-    fn bitxor(self, rhs: Self) -> Data {
+    fn bitxor(self, rhs: Self) -> DataWord {
         let bit_width = min(self.width, rhs.width);
         let constraint = ContentType::pow(2, bit_width);
 
@@ -177,7 +177,7 @@ impl ops::BitXor for Data {
             odd:          result % 2 != 0
         };
 
-        Data {
+        DataWord {
             content: result % constraint,
             width:   bit_width,
             flags:   properties
@@ -186,10 +186,10 @@ impl ops::BitXor for Data {
 }
 
 #[allow(arithmetic_overflow)]
-impl ops::Not for Data {
-    type Output = Data;
+impl ops::Not for DataWord {
+    type Output = DataWord;
 
-    fn not(self) -> Data {
+    fn not(self) -> DataWord {
         let bit_width = self.width;
         let constraint = ContentType::pow(2, bit_width);
 
@@ -206,7 +206,7 @@ impl ops::Not for Data {
             odd:          result % 2 != 0
         };
 
-        Data {
+        DataWord {
             content: result % constraint,
             width:   bit_width,
             flags:   properties
@@ -215,13 +215,13 @@ impl ops::Not for Data {
 }
 
 #[allow(arithmetic_overflow)]
-impl Data {
-    pub fn from(mut content: ContentType, width: u32) -> Data {
+impl DataWord {
+    pub fn from(mut content: ContentType, width: u32) -> DataWord {
         let constraint = ContentType::pow(2, width);
 
         content %= constraint;
 
-        Data {
+        DataWord {
             content,
             width,
             flags: ALUFlags {
@@ -237,14 +237,14 @@ impl Data {
         }
     }
 
-    pub fn rsh(val: Data) -> Data {
+    pub fn rsh(val: DataWord) -> DataWord {
         let constraint = ContentType::pow(2, val.width);
 
         let temp_overflow = val.content % 2 == 1;
 
         let result = (val.content >> 1) % constraint;
 
-        Data {
+        DataWord {
             content: result,
             width: val.width,
             flags: ALUFlags {
@@ -260,7 +260,7 @@ impl Data {
         }
     }
 
-    pub fn cmp(&self, rhs: &Data) -> CMPFlags {
+    pub fn cmp(&self, rhs: &DataWord) -> CMPFlags {
         CMPFlags {
             greater: self.content > rhs.content,
             less_equal: self.content <= rhs.content,
