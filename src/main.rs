@@ -1,4 +1,5 @@
 mod bit_ops;
+mod table;
 
 use bit_ops::*;
 
