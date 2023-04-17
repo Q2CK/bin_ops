@@ -8,12 +8,14 @@ use crossterm::{QueueableCommand,
 use crossterm::style::Color::{Black, White};
 use crossterm::style::{SetColors, SetForegroundColor};
 
+#[derive(Clone)]
 struct Character {
     character: char,
     fg_color: Color,
     bg_color: Color
 }
 
+#[derive(Clone)]
 struct Change {
     column: usize,
     row: usize,
@@ -69,13 +71,13 @@ impl View {
     fn update(&mut self) -> Result<()> {
         let mut current_colors = (Black, White);
         for change in self.changes.iter() {
-            self.stdout.queue(MoveTo(column as u16, row as u16))?;
+            self.stdout.queue(MoveTo(change.column as u16, change.row as u16))?;
             if current_colors != (change.symbol.fg_color, change.symbol.bg_color) {
                 current_colors = (change.symbol.fg_color, change.symbol.bg_color);
                 self.stdout.queue(SetForegroundColor(change.symbol.fg_color))?;
                 self.stdout.queue(SetBackgroundColor(change.symbol.bg_color))?;
             }
-            self.stdout.queue(Print(symbol.character))?;
+            self.stdout.queue(Print(change.symbol.character))?;
         }
         self.stdout.flush()?;
         self.changes.clear();
