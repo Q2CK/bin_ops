@@ -17,7 +17,7 @@ pub struct ALUFlags {
     pub odd:           bool
 }
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug)]
 pub struct CMPFlags {
     pub greater:       bool,
     pub less_equal:    bool,
